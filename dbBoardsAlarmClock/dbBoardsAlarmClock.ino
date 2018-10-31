@@ -26,9 +26,6 @@ dbBoardsAlarmClock.ino
     guaranteed. However, if you like the code and find it useful I would happily take a beer should you 
     ever catch me at the local.
 *///---------------------------------------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------------------------------------
 #include <LiquidCrystal.h>                 // https://github.com/sparkfun/SparkFun_DS1307_RTC_Arduino_Library
 LiquidCrystal lcd(8,11,5,4,3,2);           // Initialize the LCD for the LCD RTC UNO Configuration
 #include <SparkFunDS1307RTC.h>             // Standard in Arduino
@@ -38,7 +35,7 @@ LiquidCrystal lcd(8,11,5,4,3,2);           // Initialize the LCD for the LCD RTC
 boolean menu = false, alarmSet = false, alarmSound = false, snooze = false;
 // These are the digital pin numbers for the three buttons and the buzzer
 const int up = 16, select = 15, down = 14, buzzer = 10;
-int lastButton = 0, lastMinute = 0;        // Stop the program from updating the screen and double clicks
+int lastButton = 0, lastMinute = 90;        // Stop the program from updating the screen and double clicks
 int alarmHour = 0, alarmMinute = 0;        // Save the user selected alarm time
 int menuState = 0, menuPosition = 0;       // Also used to navigate the menu program
 int alarms[] = {5,0,0,0};                  // Preset array used to create alarm
@@ -113,6 +110,7 @@ void showTime(){                          // Show the clock display and selected
     lastMinute = int(rtc.minute());       // Update lastMinute value
     lcd.setCursor(0,0);                   // Set the cursor in the top left cell
     if(rtc.hour() > 12) lcd.print(String(rtc.hour() - 12)); // Fix 24 hour time for display
+    else if(rtc.hour() == 0) lcd.print("12"); // If the clock is 0:00 make it 12:00
     else lcd.print(String(rtc.hour()));   // If it is AM display the hour as is
     lcd.print(":");                       // Print a ":" to seperate the hours and minutes
     if(rtc.minute() < 10) lcd.print("0"); // Add a 0 if the minutes are single digit
@@ -231,9 +229,10 @@ void updateMenu(int btn){                 // Use the current button pressed to u
         delay(100);                       // Let the screen breath so it does not flicker
         lcd.clear();                      // Clear the display
         lcd.setCursor(0,0);               // Start in the top left
-        if(timeNow[2] < 10) lcd.print("0"); // If the selected hour is less then 10 add a leading zero
+        if(timeNow[2] == 0) lcd.print("12"); // Make 0:00 12:00
+        else if(timeNow[2] < 10) lcd.print("0"); // If the selected hour is less then 10 add a leading zero
         if(timeNow[2] > 12) lcd.print(timeNow[2] - 12); // Correct for 24 hour time
-        else lcd.print(timeNow[2]);       // Print the selected hour
+        else if(timeNow[2] != 0) lcd.print(timeNow[2]);       // Print the selected hour
         lcd.print(":");                   // Print ":" to seperate hour and minute
         if(timeNow[1]<10) lcd.print("0"); // If the selected minute is single digit print a leading zero
         lcd.print(timeNow[1]);            // Print selected minute
